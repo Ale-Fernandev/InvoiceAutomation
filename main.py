@@ -5,6 +5,8 @@ import datetime
 from tkinter import messagebox
 import uuid
 import locale
+import os
+import sys
 
 # Set locale for currency formatting
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
@@ -12,6 +14,16 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 # List that holds information of the invoice being filled out.
 invoiceList = []
 
+# Function to get the absolute path to resource
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 # Functions
 def clearItem():
@@ -48,7 +60,8 @@ def format_currency(value):
 
 
 def generateInvoice():
-    doc = DocxTemplate("invoice_template.docx")
+    doc_path = resource_path("invoice_template.docx")
+    doc = DocxTemplate(doc_path)
     name = firstName_entry.get() + " " + lastName_entry.get()
     phone = phoneNum_entry.get()
     date = datetime.datetime.now().strftime("%m/%d/%Y")
@@ -56,8 +69,6 @@ def generateInvoice():
     address2 = address2_entry.get()
     estimate_id = str(uuid.uuid4())[:8]
 
-    
-    
     formatted_invoice_list = [{"job": item[0], "desc": item[1], "price": format_currency(item[2])} for item in invoiceList]
 
     subtotal = sum(item[2] for item in invoiceList)
@@ -79,7 +90,7 @@ def generateInvoice():
                 "salestax": formatted_salestax,
                 "total":formatted_total})
     
-    doc_name = "newInvoice" + name + datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S") + ".doxc"
+    doc_name = "newInvoice_" + name + "_" + datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S") + ".docx"
     doc.save(doc_name)
 
     messagebox.showinfo("Invoice Complete", "Invoice Complete")
@@ -147,21 +158,14 @@ tree.heading('job', text = 'Job')
 tree.heading('desc', text = 'Description')
 tree.heading('price', text = 'Job Price')
 
-
 # Columnspan = 3 says to take up the space that 3 columns do, To keep presentability 
 tree.grid(row = 5, column = 0, columnspan = 4, padx = 20, pady = 10)
 
 # Generate New Invoice  / Save Invoice
 # sticky = 'news' = North, East, West, South. I'm telling the button to stay expanded in these directions
-
 saveInvoiceButton = tkinter.Button(frame , text = "Generate Invoice", command = generateInvoice)
 saveInvoiceButton.grid(row = 6, column = 0, columnspan = 4, sticky = "news", padx= 20, pady = 5)
 newInvoiceButton = tkinter.Button(frame , text = "New Invoice", command = newInvoice)
 newInvoiceButton.grid(row = 7, column = 0, columnspan = 4, sticky = "news", padx = 20, pady = 5)
-
-
-
-
-
 
 window.mainloop()
