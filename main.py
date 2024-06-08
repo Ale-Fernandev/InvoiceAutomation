@@ -73,7 +73,7 @@ def generateInvoice():
 
     subtotal = sum(item[2] for item in invoiceList)
     formatted_subtotal = format_currency(subtotal)
-    salestax_rate = 0.1                                 # Change this to the percentage of sales tax. Default = 0.1 for 10%
+    salestax_rate = 0.07                                 # Change this to the percentage of sales tax. Default = 0.1 for 10%
     salestax = subtotal * salestax_rate
     formatted_salestax = format_currency(salestax)
     total = subtotal * (1 + salestax_rate)
